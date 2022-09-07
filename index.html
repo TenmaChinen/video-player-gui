@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video</title>
+  <link rel="stylesheet" href="settings/style.css">
+</head>
+
+<body>
+  <span id="btn-toggle-list">📄</span>
+  <div id="video-title"></div>
+  <span id="btn-next-video"></span>
+  <span id="btn-prev-video"></span>
+  <video id="video-element" width="100%" controls="">
+    <source id="source-element" src="" type="video/mp4">
+    <track id="track-caption" label="English" kind="subtitles" srclang="en" default>
+  </video>
+  <ul id="list-view" tabindex="0"></ul>
+</body>
+
+<script src="settings/directories.js"></script>
+
+<script>
+
+  const btnToggleList = document.getElementById("btn-toggle-list");
+  const videoTitle = document.getElementById("video-title");
+  const videoElement = document.getElementById("video-element");
+  const sourceElement = document.getElementById("source-element");
+  const trackCaption = document.getElementById("track-caption");
+  const btnPrevVideo = document.getElementById("btn-prev-video");
+  const btnNextVideo = document.getElementById("btn-next-video");
+  const listView = document.getElementById("list-view");
+
+  let idxChapter = 0;
+  let idxVideo = 0;
+  
+  setListViewVisibility(false);
+
+  fileList.forEach((chapterObj, idxChap) => {
+    const chapterName = chapterObj.chapterName;
+    let listItems = "";
+    chapterObj.videos.forEach((videoName, idxVid) => {
+      listItems += `<li onclick="onClickVideoListItem(${idxChap},${idxVid})">${videoName}</li>`
+    });
+    listView.innerHTML += `<li><div><span>${chapterName}</span><ul>${listItems}</ul></div><li>`;
+  });
+
+  loadVideo(false);
+
+
+  /*   E V E N T S   */
+  videoElement.onkeydown = function (event) {
+
+    if (event.shiftKey) {
+      if ((event.keyCode == 190) && (this.playbackRate < 2.0)) {
+        this.playbackRate += 0.25;
+
+      } else if ((event.keyCode == 188) && (this.playbackRate > 0.25)) {
+        this.playbackRate -= 0.25;
+      }
+    } else {
+      switch (event.keyCode) {
+        case 70: /* F Key */
+          if (document.fullscreen) {
+            videoElement.webkitExitFullScreen();
+          } else {
+            videoElement.requestFullscreen();
+          }
+          break;
+        case 83: /* S Key */
+          setTrackCaptionsState(!isTrackCaptionOn());
+          break;
+      }
+    }
+  }
+
+  videoElement.onended = function (event) {
+    startNextVideo();
+  }
+
+  let timerHideButtons;
+
+  window.onmousemove = function (event) {
+    showOverlay();
+    clearTimeout(timerHideButtons);
+    timerHideButtons = setTimeout(hideOverlay, 5000);
+  }
+
+  btnNextVideo.onclick = () => startNextVideo();
+  btnPrevVideo.onclick = () => startPrevVideo();
+
+  listView.addEventListener("focusout", (event) => {
+    listView.style.setProperty("display", "none");
+  });
+
+  btnToggleList.onclick = function () {
+    setListViewVisibility(true);
+  }
+
+  function onClickVideoListItem(idxChap, idxVid) {
+    [idxChapter,idxVideo] = [idxChap,idxVid];
+    setListViewVisibility(false);
+    loadVideo();
+  }
+
+  /*   E V E N T S   */
+
+  /*   F U N C T I O N S   */
+
+  function setListViewVisibility(state){
+    listView.style.setProperty("display",state ? "block":"none");
+    if(state) listView.focus();
+  }
+
+  function showOverlay() {
+    btnNextVideo.style.setProperty("opacity", 1);
+    btnPrevVideo.style.setProperty("opacity", 1);
+    videoTitle.style.setProperty("opacity", 1);
+    btnToggleList.style.setProperty("opacity", 1);
+  }
+  
+  function hideOverlay() {
+    btnNextVideo.style.setProperty("opacity", 0);
+    btnPrevVideo.style.setProperty("opacity", 0);
+    videoTitle.style.setProperty("opacity", 0);
+    btnToggleList.style.setProperty("opacity", 0);
+  }
+
+
+  function loadVideo(play = true) {
+    sourceElement.src = getCurrentVideoSource();
+    trackCaption.src = getCurrentCaptionSource();
+    videoElement.load();
+    setVideoTitle();
+    if (play) videoElement.play();
+  }
+
+  function getCurrentVideoSource() {
+    return `${getChapterName()}/${getVideoName()}.mp4`;
+  }
+
+  function getCurrentCaptionSource() {
+    return `${getChapterName()}/${getVideoName()}.vtt`;
+  }
+
+  function startNextVideo() {
+    if (idxVideo < fileList[idxChapter].videos.length) {
+      idxVideo += 1;
+      loadVideo();
+    }
+  }
+
+  function startPrevVideo() {
+    // if ( idxChapter > 0)
+    if (idxVideo > 0) {
+      idxVideo -= 1;
+      loadVideo();
+    }
+  }
+
+  function setVideoTitle() {
+    const chapterName = getChapterName();
+    const videoName = getVideoName();
+    const NUM_VIDEOS = String(getChapterNumVideos()).padStart(2, "0");
+    const IDX_VIDEO = String(idxVideo + 1).padStart(2, "0");
+    videoTitle.innerHTML = `<h3>${chapterName}</h3><h4>${videoName} - ( ${IDX_VIDEO} / ${NUM_VIDEOS} )</h4>`;
+  }
+
+  /* Data Names */
+
+  function getChapterName() {
+    return fileList[idxChapter].chapterName;
+  }
+
+  function getVideoName() {
+    return fileList[idxChapter].videos[idxVideo];
+  }
+
+  function getChapterNumVideos() {
+    return fileList[idxChapter].videos.length;
+  }
+
+  /* Captions */
+
+  function setTrackCaptionsState(state) {
+    for (let idx = 0; idx < videoElement.textTracks.length; idx++) {
+      videoElement.textTracks[idx].mode = state ? "showing" : "hidden";
+    }
+  }
+
+  function isTrackCaptionOn() {
+    for (let idx = 0, textTrack; textTrack = videoElement.textTracks[idx]; idx++) {
+      if (textTrack.mode === "showing") return true;
+    }
+    return false;
+  }
+
+  /*   F U N C T I O N S   */
+
+</script>
+
+
+</html>
