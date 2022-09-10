@@ -51,14 +51,13 @@
 
 
   /*   E V E N T S   */
-  videoElement.onkeydown = function (event) {
-
+  window.onkeydown = function (event) {
     if (event.shiftKey) {
-      if ((event.keyCode == 190) && (this.playbackRate < 2.0)) {
-        this.playbackRate += 0.25;
+      if ((event.keyCode == 190) && (videoElement.playbackRate < 2.0)) {
+        videoElement.playbackRate += 0.25;
 
-      } else if ((event.keyCode == 188) && (this.playbackRate > 0.25)) {
-        this.playbackRate -= 0.25;
+      } else if ((event.keyCode == 188) && (videoElement.playbackRate > 0.25)) {
+        videoElement.playbackRate -= 0.25;
       }
     } else {
       switch (event.keyCode) {
@@ -132,7 +131,9 @@
   function loadVideo(play = true) {
     sourceElement.src = getCurrentVideoSource();
     trackCaption.src = getCurrentCaptionSource();
+    const playbackRate = videoElement.playbackRate;
     videoElement.load();
+    videoElement.playbackRate = playbackRate;
     setVideoTitle();
     if (play) videoElement.play();
   }
