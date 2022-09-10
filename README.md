@@ -34,14 +34,18 @@ C:\video-player-gui\settings> python files_indexing.py
   | S                | Toggle Subtitles if available |
   | Right Shift + .  | Speeds Up video by 0.25 secs  |
   | Right Shift + ,  | Slows Down video by 0.25 secs |
-  | Arrow Left       | Go back 5 seconds             |
-  | Arrow Right      | Go forward 5 seconds          |
+  | Right Shift + →   | Speeds Up video by 0.25 secs  |
+  | Right Shift + ←  | Slows Down video by 0.25 secs |
+  | Arrow Left       | Go back 2 seconds             |
+  | Arrow Right      | Go forward 2 seconds          |
+  | J                | Go back 10 seconds            |
+  | K                | Toggle Play / Pause           |
+  | L                | Go forward 10 seconds         |
   | Escape           | Exit full-screen mode         |
 
 ## Future Work
 - Allow the app to manage other video files like `.mkv`.
 - Allow the Python script to target video files sparse from any part of the hierarchy.
-- Add similar shortcuts and features like Youtube.
 - Allow users to set custom video urls in some JSON file to make their own video hub instead of storing the videos locally.
 
 ## Screenshots
