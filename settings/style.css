@@ -47,7 +47,6 @@ video{
   z-index: 0;
 }
 
-
 #video-title{
   position: absolute;
   max-width: 1200px;
@@ -144,6 +143,21 @@ video{
   border-radius: 5px;
 }
 
+
+#speed{
+  position: absolute;
+  right: 10px;
+  bottom: 80px;
+  background-color: rgba(52, 52, 52, 0.541);
+  color: white;
+  padding: 10px;
+  font-size: 20px;
+  min-width: 80px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1;
+  transition: opacity 1s ease-out;
+}
 
 /*   L I S T   V I E W   */
 
