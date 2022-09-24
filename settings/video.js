@@ -11,6 +11,8 @@ const speedElement = document.getElementById("speed");
 let idxChapter = 0;
 let idxVideo = 0;
 
+const NUM_CHAPTERS = fileList.length;
+
 setListViewVisibility(false);
 
 fileList.forEach((chapterObj, idxChap) => {
@@ -151,8 +153,9 @@ function hideOverlay() {
 
 
 function loadVideo(play = true) {
+  console.log(getCurrentVideoSource());
   sourceElement.src = getCurrentVideoSource();
-  trackCaption.src = getCurrentCaptionSource();
+  // trackCaption.src = getCurrentCaptionSource();
   const playbackRate = videoElement.playbackRate;
   videoElement.load();
   videoElement.playbackRate = playbackRate;
@@ -161,11 +164,11 @@ function loadVideo(play = true) {
 }
 
 function getCurrentVideoSource() {
-  return `${getChapterName()}/${getVideoName()}.mp4`;
+  return `videos/${getChapterName()}/${getVideoName()}.mp4`;
 }
 
 function getCurrentCaptionSource() {
-  return `${getChapterName()}/${getVideoName()}.vtt`;
+  return `videos/${getChapterName()}/${getVideoName()}.vtt`;
 }
 
 function startNextVideo() {
