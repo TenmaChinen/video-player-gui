@@ -27,8 +27,8 @@ videoElement.focus();
 
 
 const Key = {
-  DOT: 190, COMMA: 188, ARROW_L: 37, ESC : 27,
-  ARROW_R: 39, F: 70, S: 83, J: 74, K : 75, L: 76
+  DOT: 190, COMMA: 188, ARROW_L: 37, ESC: 27,
+  ARROW_R: 39, F: 70, S: 83, J: 74, K: 75, L: 76
 }
 
 /*   E V E N T S   */
@@ -39,7 +39,7 @@ videoElement.onkeydown = function (event) {
     if (((KEY_CODE === Key.DOT) || (KEY_CODE === Key.ARROW_R)) && (videoElement.playbackRate < 2.0)) {
       videoElement.playbackRate += 0.25;
       showSpeed();
-      
+
     } else if (((KEY_CODE === Key.COMMA) || (KEY_CODE === Key.ARROW_L)) && (videoElement.playbackRate > 0.25)) {
       videoElement.playbackRate -= 0.25;
       showSpeed();
@@ -60,7 +60,7 @@ videoElement.onkeydown = function (event) {
         videoElement.currentTime -= 10;
         break;
       case Key.K:
-        if ( videoElement.paused) videoElement.play();
+        if (videoElement.paused) videoElement.play();
         else videoElement.pause();
         break;
       case Key.L:
@@ -112,21 +112,21 @@ function onClickVideoListItem(idxChap, idxVid) {
 
 let speedTimer;
 
-function showSpeed(){
+function showSpeed() {
   speedElement.innerHTML = `X ${videoElement.playbackRate}`;
-  
-  if(!isSpeedVisible()){
+
+  if (!isSpeedVisible()) {
     setSpeedVisibility(true);
   }
   clearTimeout(speedTimer);
-  speedTimer = setTimeout(setSpeedVisibility,1000,false);
+  speedTimer = setTimeout(setSpeedVisibility, 1000, false);
 }
 
-function setSpeedVisibility(state){
+function setSpeedVisibility(state) {
   speedElement.style.setProperty("opacity", state ? 1 : 0);
 }
 
-function isSpeedVisible(){
+function isSpeedVisible() {
   return speedElement.style.getPropertyValue("display") === "block";
 }
 
@@ -169,18 +169,31 @@ function getCurrentCaptionSource() {
 }
 
 function startNextVideo() {
-  if (idxVideo < fileList[idxChapter].videos.length) {
-    idxVideo += 1;
-    loadVideo();
+
+  if (idxChapter < (NUM_CHAPTERS - 1)) {
+    idxVideo++;
+    if (idxVideo == getChapterNumVideos()) {
+      idxVideo = 0;
+      idxChapter++;
+    }
+  } else if (idxVideo < (getChapterNumVideos() - 1)) {
+    idxVideo++;
+  } else {
+    return;
   }
+  loadVideo();
 }
 
 function startPrevVideo() {
-  // if ( idxChapter > 0)
   if (idxVideo > 0) {
-    idxVideo -= 1;
-    loadVideo();
+    idxVideo--;
+  } else if (idxChapter > 0) {
+    idxChapter--;
+    idxVideo = fileList[idxChapter].videos.length - 1;
+  } else {
+    return;
   }
+  loadVideo();
 }
 
 function setVideoTitle() {
