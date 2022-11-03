@@ -112,6 +112,7 @@ video{
   list-style-position: inside;
   overflow-y: auto;
   outline: none;
+  scroll-behavior: smooth;
 }
 
 #list-view > li > div{
@@ -141,6 +142,10 @@ video{
 #list-view > li div > ul > li:hover{
   background-color: rgb(89, 89, 89);
   border-radius: 5px;
+}
+
+#list-view > li div > ul > li.selected{
+  background-color: rgb(94, 126, 14);
 }
 
 

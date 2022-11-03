@@ -10,6 +10,7 @@ const speedElement = document.getElementById("speed");
 
 let idxChapter = 0;
 let idxVideo = 0;
+let lastIdItem = null;
 
 const NUM_CHAPTERS = fileList.length;
 
@@ -18,12 +19,15 @@ setListViewVisibility(false);
 fileList.forEach((chapterObj, idxChap) => {
   const chapterName = chapterObj.chapterName;
   let listItems = "";
+  let idItem; 
   chapterObj.videos.forEach((videoName, idxVid) => {
-    listItems += `<li onclick="onClickVideoListItem(${idxChap},${idxVid})">${videoName}</li>`
+    idItem = getIdItem(idxChap,idxVid);
+    listItems += `<li id=${idItem} onclick="onClickVideoListItem(${idxChap},${idxVid})">${videoName}</li>`
   });
   listView.innerHTML += `<li><div><span>${chapterName}</span><ul>${listItems}</ul></div><li>`;
 });
 
+loadUserState();
 loadVideo(false);
 videoElement.focus();
 
@@ -92,7 +96,6 @@ listView.addEventListener("focusout", (event) => {
 });
 
 listView.onkeydown = function (event) {
-  console.log(event.keyCode);
   if (event.keyCode === Key.ESC) {
     setListViewVisibility(false);
   }
@@ -134,7 +137,10 @@ function isSpeedVisible() {
 
 function setListViewVisibility(state) {
   listView.style.setProperty("display", state ? "block" : "none");
-  if (state) listView.focus();
+  if (state){
+    listView.focus();
+    document.getElementById(getIdItem(idxChapter,idxVideo)).scrollIntoView();
+  }
 }
 
 function showOverlay() {
@@ -151,24 +157,24 @@ function hideOverlay() {
   btnToggleList.style.setProperty("opacity", 0);
 }
 
-
 function loadVideo(play = true) {
-  console.log(getCurrentVideoSource());
   sourceElement.src = getCurrentVideoSource();
-  // trackCaption.src = getCurrentCaptionSource();
+  trackCaption.setAttribute("src",getCurrentCaptionSource());
   const playbackRate = videoElement.playbackRate;
   videoElement.load();
   videoElement.playbackRate = playbackRate;
+  highlightItem(getIdItem(idxChapter,idxVideo));
   setVideoTitle();
+  saveUserState();
   if (play) videoElement.play();
 }
 
 function getCurrentVideoSource() {
-  return `videos/${getChapterName()}/${getVideoName()}.mp4`;
+  return `./videos/${getChapterName()}/${getVideoName()}.mp4`;
 }
 
 function getCurrentCaptionSource() {
-  return `videos/${getChapterName()}/${getVideoName()}.vtt`;
+  return `./videos/${getChapterName()}/${getVideoName()}.vtt`;
 }
 
 function startNextVideo() {
@@ -207,6 +213,36 @@ function setVideoTitle() {
   videoTitle.innerHTML = `<h3>${chapterName}</h3><h4>${videoName} - ( ${IDX_VIDEO} / ${NUM_VIDEOS} )</h4>`;
 }
 
+function highlightItem(idItem){
+  if (lastIdItem != null){
+    document.getElementById(lastIdItem).classList.remove("selected");
+  }
+  lastIdItem = idItem;
+  document.getElementById(idItem).classList.add("selected");
+}
+
+
+/* Storage */
+
+function loadUserState(){
+  let userData = localStorage.getItem(userId);
+  if (userData != null){
+    userData = JSON.parse(userData);
+  }else{
+    userData = { idxChapter : 0, idxVideo : 0}
+  }
+  
+  idxChapter = userData.idxChapter;
+  idxVideo = userData.idxVideo;
+
+  highlightItem(getIdItem(idxChapter,idxVideo));
+}
+
+function saveUserState(){
+  const userData = {idxChapter : idxChapter, idxVideo, idxVideo};
+  localStorage.setItem(userId, JSON.stringify(userData) );
+}
+
 /* Data Names */
 
 function getChapterName() {
@@ -219,6 +255,11 @@ function getVideoName() {
 
 function getChapterNumVideos() {
   return fileList[idxChapter].videos.length;
+}
+
+
+function getIdItem(idxCha,idxVid){
+  return `id-${idxCha}-${idxVid}`;
 }
 
 /* Captions */
